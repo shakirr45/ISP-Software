@@ -1,0 +1,102 @@
+<?php
+set_time_limit(300);
+
+// OLT credentials
+$oltIp = "172.35.156.14";
+$community = "bsd";
+
+// Required SNMP OIDs
+$oids = [
+    'name'        => "1.3.6.1.2.1.2.2.1.2",
+    'rx_power'    => "1.3.6.1.4.1.3320.101.10.5.1.5",
+    'tx_power'    => "1.3.6.1.4.1.3320.101.10.5.1.6",
+    'distance'    => "1.3.6.1.4.1.3320.101.10.1.1.27",
+    'serial'      => "1.3.6.1.4.1.3320.101.10.1.1.3",
+];
+
+// Step 1: Collect SNMP data
+$data = [];
+
+foreach ($oids as $key => $oid) {
+    $output = shell_exec("snmpwalk -v2c -c $community $oltIp $oid");
+    $lines = explode("\n", trim($output));
+
+    foreach ($lines as $line) {
+        if (preg_match('/\.(\d+) = (?:STRING|INTEGER|Hex-STRING|Gauge32): ?"?(.+?)"?$/', $line, $matches)) {
+            $index = $matches[1];
+            $value = $matches[2];
+
+            // Normalize special values
+            if (in_array($key, ['rx_power', 'tx_power'])) {
+                $value = (int)$value;
+                if ($value == -65535) continue;
+                $value = $value / 10;
+            }
+
+            if ($key == 'serial' && str_starts_with($line, "SNMPv2-SMI")) {
+                $hex = preg_replace('/[^0-9A-Fa-f ]/', '', $value);
+                $value = strtoupper(str_replace(' ', ':', trim($hex)));
+            }
+
+
+            $data[$index][$key] = $value;
+        }
+    }
+}
+
+// Step 2: Filter EPON ONU interfaces only
+$onuPorts = array_filter($data, function ($item) {
+    return isset($item['name']) && preg_match('/^EPON\d+\/\d+:\d+$/', $item['name']);
+});
+
+// Step 3: Sort EPON interfaces logically
+uasort($onuPorts, function ($a, $b) {
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $a['name'], $m1);
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $b['name'], $m2);
+    return [$m1[1], $m1[2], $m1[3]] <=> [$m2[1], $m2[2], $m2[3]];
+});
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ONU Port List</title>
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>ONU Port Status (<?= count($onuPorts) ?> Found)</span>
+            <button onclick="location.reload()" class="btn btn-primary btn-sm">🔁 Refresh</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-sm align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Port</th>
+                        <th>Distance</th>
+                        <th>Tx Power</th>
+                        <th>Rx Power</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $i = 1;
+                    foreach ($onuPorts as $port) {
+                        echo "<tr>
+                            <td>{$i}</td>
+                            <td>{$port['name']}</td>
+                            <td>" . ($port['distance'] ?? '-') . " m</td>
+                            <td>" . ($port['tx_power'] ?? '-') . " dBm</td>
+                            <td>" . ($port['rx_power'] ?? '-') . " dBm</td>
+                        </tr>";
+                        $i++;
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

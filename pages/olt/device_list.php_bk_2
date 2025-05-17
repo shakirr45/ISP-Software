@@ -1,0 +1,193 @@
+<?php
+
+set_time_limit(300);
+
+$oltIp = "172.35.156.14";
+$community = "bsd";
+
+// SNMP OIDs
+$oidIfDescr     = "1.3.6.1.2.1.2.2.1.2";
+$oidIfOperStatus = "1.3.6.1.2.1.2.2.1.8";
+$oidVendorId    = "1.3.6.1.4.1.3320.101.10.1.1.1";
+$oidRxPower     = "1.3.6.1.4.1.3320.101.10.5.1.5";
+$oidTxPower     = "1.3.6.1.4.1.3320.101.10.5.1.6";
+$oidDistance    = "1.3.6.1.4.1.3320.101.10.1.1.27";
+$oidSerial      = "1.3.6.1.4.1.3320.101.10.1.1.3";
+$oidMacAddress  = "1.3.6.1.2.1.2.2.1.6";
+$oidIfSpeed     = "1.3.6.1.2.1.2.2.1.5";
+
+// SNMP Fetching
+function snmpFetch($oid) {
+    global $oltIp, $community;
+    return explode("\n", trim(shell_exec("snmpwalk -v2c -c $community $oltIp $oid")));
+}
+
+$descrLines     = snmpFetch($oidIfDescr);
+$statusLines    = snmpFetch($oidIfOperStatus);
+$vendorIdLines  = snmpFetch($oidVendorId);
+$rxPowerLines   = snmpFetch($oidRxPower);
+$txPowerLines   = snmpFetch($oidTxPower);
+$distanceLines  = snmpFetch($oidDistance);
+$serialLines    = snmpFetch($oidSerial);
+$macAddressLines = snmpFetch($oidMacAddress);
+$speedLines     = snmpFetch($oidIfSpeed);
+
+$interfaceData = [];
+
+function hexToSerial($hexString) {
+    $parts = explode(' ', $hexString);
+    return strtoupper(implode(':', $parts));
+}
+
+// Interface Name
+foreach ($descrLines as $line) {
+    if (preg_match('/\.(\d+) = STRING: (.+)/', $line, $matches)) {
+        $interfaceData[$matches[1]] = ['name' => $matches[2]];
+    }
+}
+
+// Status
+$statusMap = [1 => 'Connected', 2 => 'Down', 3 => 'Testing', 4 => 'Unknown', 5 => 'Dormant', 6 => 'Not Present', 7 => 'Lower Layer Down'];
+foreach ($statusLines as $line) {
+    if (preg_match('/\.(\d+) = INTEGER: \w+\((\d+)\)/', $line, $matches)) {
+        $interfaceData[$matches[1]]['status'] = $statusMap[$matches[2]] ?? 'Unknown';
+    }
+}
+
+// Vendor ID
+foreach ($vendorIdLines as $line) {
+    if (preg_match('/\.(\d+) = STRING: "?(.+?)"?$/', $line, $matches)) {
+        $interfaceData[$matches[1]]['vendor_id'] = $matches[2];
+    }
+}
+
+// Rx Power
+foreach ($rxPowerLines as $line) {
+    if (preg_match('/\.(\d+) = INTEGER: (-?\d+)/', $line, $matches)) {
+        $v = (int)$matches[2];
+        if ($v != -65535) {
+            $interfaceData[$matches[1]]['rx_power'] = $v / 10;
+        }
+    }
+}
+
+// Tx Power
+foreach ($txPowerLines as $line) {
+    if (preg_match('/\.(\d+) = INTEGER: (-?\d+)/', $line, $matches)) {
+        $v = (int)$matches[2];
+        if ($v != -65535) {
+            $interfaceData[$matches[1]]['tx_power'] = $v / 10;
+        }
+    }
+}
+
+// Distance
+foreach ($distanceLines as $line) {
+    if (preg_match('/\.(\d+) = INTEGER: (\d+)/', $line, $matches)) {
+        $interfaceData[$matches[1]]['distance'] = $matches[2];
+    }
+}
+
+// Serial Number
+foreach ($serialLines as $line) {
+    if (preg_match('/\.(\d+) = (Hex-STRING|STRING):\s(.+)/', $line, $matches)) {
+        $index = $matches[1];
+        $value = trim($matches[3]);
+
+        $interfaceData[$index]['serial_number'] = $matches[2] === "Hex-STRING" ? hexToSerial($value) : trim($value, '"');
+    }
+}
+
+// MAC
+foreach ($macAddressLines as $line) {
+    if (preg_match('/\.(\d+) = STRING: ([\dA-Fa-f:]+)/', $line, $matches)) {
+        $interfaceData[$matches[1]]['mac_address'] = strtoupper(trim($matches[2]));
+    }
+}
+
+// Speed
+foreach ($speedLines as $line) {
+    if (preg_match('/\.(\d+) = Gauge32: (\d+)/', $line, $matches)) {
+        $bps = (int)$matches[2];
+        $interfaceData[$matches[1]]['speed'] = ($bps / 1000000) . ' Mbps';
+    }
+}
+
+// Filter ONU Ports
+$onuPorts = array_filter($interfaceData, function ($data) {
+    return isset($data['name']) && preg_match('/^EPON\d+\/\d+:\d+$/', $data['name']);
+});
+
+// Sort logically
+uasort($onuPorts, function ($a, $b) {
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $a['name'], $aMatch);
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $b['name'], $bMatch);
+    return [$aMatch[1], $aMatch[2], $aMatch[3]] <=> [$bMatch[1], $bMatch[2], $bMatch[3]];
+});
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ONU Ports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 py-8">
+
+<div class="max-w-7xl mx-auto px-4">
+    <div class="mb-4 flex justify-between items-center">
+        <div>
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded shadow">
+                🔄 Refresh
+            </button>
+            <h2 class="text-xl font-semibold text-gray-800 mt-2">
+                Total ONUs: <?= count($onuPorts) ?>
+            </h2>
+        </div>
+    </div>
+
+    <table class="min-w-full table-auto border-collapse border border-gray-200 shadow-md rounded-lg overflow-hidden">
+        <thead class="bg-blue-600 text-white">
+        <tr>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">SL</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Name</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Serial Number</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">MAC</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Vendor</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Distance</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Tx Power</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Rx Power</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Speed</th>
+        </tr>
+        </thead>
+        <tbody class="bg-white text-gray-800">
+        <?php $sl = 1; foreach ($onuPorts as $data): ?>
+            <tr class="border-t border-gray-200">
+                <td class="px-4 py-3 text-xs"><?= $sl++ ?></td>
+                <td class="px-4 py-3 text-xs"><?= htmlspecialchars($data['name']) ?></td>
+                <td class="px-4 py-3 text-xs"><?= $data['serial_number'] ?? '-' ?></td>
+                <td class="px-4 py-3 text-xs">
+                    <?php if (($data['status'] ?? '') === 'Connected'): ?>
+                        <span class="bg-green-500 text-white py-0.5 px-1 rounded-full text-xxs">Connected</span>
+                    <?php elseif (($data['status'] ?? '') === 'Down'): ?>
+                        <span class="bg-red-500 text-white py-0.5 px-1 rounded-full text-xs">Down</span>
+                    <?php else: ?>
+                        <span class="bg-gray-300 text-gray-800 py-0.5 px-1 rounded-full text-xs"><?= $data['status'] ?? 'Unknown' ?></span>
+                    <?php endif; ?>
+                </td>
+                <td class="px-4 py-3 text-xs"><?= $data['mac_address'] ?? 'N/A' ?></td>
+                <td class="px-4 py-3 text-xs"><?= $data['vendor_id'] ?? 'N/A' ?></td>
+                <td class="px-4 py-3 text-xs"><?= $data['distance'] ?? 'N/A' ?> m</td>
+                <td class="px-4 py-3 text-xs"><?= isset($data['tx_power']) ? $data['tx_power'] . ' dBm' : 'N/A' ?></td>
+                <td class="px-4 py-3 text-xs"><?= isset($data['rx_power']) ? $data['rx_power'] . ' dBm' : 'N/A' ?></td>
+                <td class="px-4 py-3 text-xs"><?= $data['speed'] ?? 'N/A' ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

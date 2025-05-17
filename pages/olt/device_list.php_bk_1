@@ -1,0 +1,158 @@
+
+<style>
+    .table-responsive {
+        overflow-x: auto;
+    }
+</style>
+<div class="col-md-12">
+    <div class="">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
+      ➕ Add New Device
+    </button>
+  </div>
+</div>
+
+
+
+
+<div class="col-md-12">
+    <div class="card basic-data-table">
+        <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Bill Collection List</h5>
+        </div>
+        <div class="card-body table-responsive">
+            <table
+                class="table bordered-table mb-0"
+                id="customer-datatable"
+                data-page-length="10">
+                <thead>
+                    <tr>
+                        <th scope="col">SL.</th>
+                        <?php if ($obj->userWorkPermission('edit')) { ?>
+                            <th scope="col-md-2">Action</th>
+                        <?php } ?>
+                        <th scope="col">ID</th>
+                        <th scope="col">Device Name</th>
+                        <th scope="col">Device IP:</th>
+                        <th scope="col">Login Username:</th>
+                        <th scope="col">Telnet Port:</th>
+                        <th scope="col">Device Type:</th>
+                        <th scope="col">SNMP Port:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Payment Modal -->
+<div class="modal fade" id="addDeviceModal" tabindex="-1" aria-labelledby="addDeviceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="save_device.php" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addDeviceModalLabel">==Add New Device==</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Device Type:</label>
+              <select class="form-select" name="device_type" required>
+                <option value="">--Select--</option>
+                <option value="BDCOM">BDCOM</option>
+                <option value="vsol">V-SOL</option>
+                <option value="zte">ZTE</option>
+                <option value="huawei">Huawei</option>
+                <option value="fiberhome">Fiberhome</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Device Name:</label>
+              <input type="text" class="form-control" name="device_name" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Device IP:</label>
+              <input type="text" class="form-control" name="device_ip" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Login Username:</label>
+              <input type="text" class="form-control" name="username" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Login Password:</label>
+              <input type="password" class="form-control" name="password" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Telnet Port:</label>
+              <input type="number" class="form-control" name="telnet_port" value="23" required>
+            </div>
+
+
+            <div class="mb-3">
+              <label class="form-label">SNMP Port:</label>
+              <input type="number" class="form-control" name="snmp_port" value="161" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">SNMP Community:</label>
+              <input type="text" class="form-control" name="snmp_community" value="public" required>
+            </div>
+
+            <!-- 🔄 Check Connection Button -->
+            <div class="text-end">
+              <button type="button" class="btn btn-outline-info" onclick="checkConnection()">
+                🔄 Check Connection
+              </button>
+              <div id="connection-status" class="mt-2 text-success fw-bold"></div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <?php $obj->start_script(); ?>
+    <script>
+        function checkConnection() {
+            const ip = document.querySelector('[name="device_ip"]').value;
+            const port = document.querySelector('[name="snmp_port"]').value;
+            const community = document.querySelector('[name="snmp_community"]').value;
+        
+            if (!ip || !port || !community) {
+              alert("Please fill IP, SNMP Port, and Community first.");
+              return;
+            }
+        
+            fetch('./pages/olt/check_connection_ajax.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: `ip=${ip}&port=${port}&community=${community}`
+            })
+            .then(res => res.text())
+            .then(data => {
+              document.getElementById('connection-status').innerText = data;
+            })
+            .catch(() => {
+              document.getElementById('connection-status').innerText = "❌ Error connecting.";
+            });
+          }
+    </script>
+  <?php $obj->end_script(); ?>
+  
+

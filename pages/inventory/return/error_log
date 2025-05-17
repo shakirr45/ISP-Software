@@ -1,0 +1,98 @@
+[27-Jan-2025 11:57:25 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[30-Jan-2025 09:17:04 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[30-Jan-2025 10:10:35 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'ORDER BY customer_return.return_date DESC
+        LIMIT 10 OFFSET 0' at line 10 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(63): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[30-Jan-2025 10:10:41 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'ORDER BY customer_return.return_date DESC
+        LIMIT 10 OFFSET 0' at line 10 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(63): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[30-Jan-2025 10:10:58 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'ORDER BY customer_return.return_date DESC
+        LIMIT 10 OFFSET 0' at line 10 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(63): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[30-Jan-2025 10:15:00 UTC] PHP Parse error:  syntax error, unexpected '}', expecting end of file in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php on line 143
+[30-Jan-2025 10:16:43 UTC] PHP Parse error:  syntax error, unexpected '}', expecting end of file in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php on line 143
+[01-Feb-2025 12:16:05 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND `deleted_at` IS NULL' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:519
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(519): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php(184): Model->rawSqlSingle('SELECT * FROM `...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 519
+[01-Feb-2025 12:16:29 UTC] PHP Notice:  Undefined index: models in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 120
+[01-Feb-2025 12:16:29 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND `deleted_at` IS NULL' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:519
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(519): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php(184): Model->rawSqlSingle('SELECT * FROM `...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 519
+[03-Feb-2025 11:44:24 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[03-Feb-2025 11:45:02 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[03-Feb-2025 11:45:05 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[03-Feb-2025 11:45:13 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[03-Feb-2025 11:45:15 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[03-Feb-2025 11:45:34 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[25-Feb-2025 05:35:09 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'product_id' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:542
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(542): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/customer_return_ajax.php(59): Model->rawSql('\r\n        SELEC...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 542
+[25-Feb-2025 09:38:48 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:39:10 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:42:47 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:43:02 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:43:15 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:43:22 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:43:49 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19
+[25-Feb-2025 09:43:54 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/inventory/return/supplier_return_ajax.php on line 19

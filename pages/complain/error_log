@@ -1,0 +1,18 @@
+[21-Apr-2025 18:56:25 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'entry_date' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:547
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(547): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/complain/getIndividualComplainAjax.php(65): Model->rawSql('\r\n    SELECT \r\n...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 547
+[21-Apr-2025 18:56:40 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'entry_date' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:547
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(547): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/complain/getIndividualComplainAjax.php(65): Model->rawSql('\r\n    SELECT \r\n...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 547
+[21-Apr-2025 18:58:33 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'entry_date' in WHERE is ambiguous in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:547
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(547): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/complain/getIndividualComplainAjax.php(65): Model->rawSql('\r\n    SELECT \r\n...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 547

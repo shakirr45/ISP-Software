@@ -1,0 +1,77 @@
+[27-Jan-2025 08:53:10 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '3,1,4) ORDER BY ag_id DESC LIMIT 10 OFFSET 0' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpaid_ajax.php(61): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[27-Jan-2025 08:53:20 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '3,1,4) ORDER BY ag_id DESC LIMIT 10 OFFSET 0' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpaid_ajax.php(61): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[27-Jan-2025 10:35:15 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '3,1,4) ORDER BY ag_id DESC LIMIT 10 OFFSET 0' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpaid_ajax.php(61): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[27-Jan-2025 10:35:28 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '3,1,4) ORDER BY ag_id DESC LIMIT 10 OFFSET 0' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpaid_ajax.php(61): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[27-Jan-2025 10:35:42 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '3,1,4) ORDER BY ag_id DESC LIMIT 10 OFFSET 0' at line 1 in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpaid_ajax.php(61): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:56:01 UTC] PHP Notice:  Undefined index: draw in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php on line 68
+[01-Feb-2025 10:57:07 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:57:11 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:57:12 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:57:12 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:57:12 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:57:12 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[01-Feb-2025 10:57:12 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1051 Unknown table 'bsdbdxyz_new_isp.vw_agent' in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php:510
+Stack trace:
+#0 /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php(510): PDOStatement->execute()
+#1 /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billcollection_ajax.php(49): Model->rawSql('SELECT vw_agent...')
+#2 {main}
+  thrown in /home/bsdbdxyz/newisp.bsdbd.xyz/services/Model.php on line 510
+[21-Apr-2025 06:02:33 UTC] PHP Notice:  Undefined index: ag_id in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpay_ajax.php on line 11
+[21-Apr-2025 06:02:33 UTC] PHP Notice:  Trying to access array offset on value of type null in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpay_ajax.php on line 12
+[21-Apr-2025 10:16:25 UTC] PHP Notice:  Undefined index: ag_id in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpay_ajax.php on line 11
+[21-Apr-2025 10:16:25 UTC] PHP Notice:  Trying to access array offset on value of type null in /home/bsdbdxyz/newisp.bsdbd.xyz/pages/billcollection/billpay_ajax.php on line 12

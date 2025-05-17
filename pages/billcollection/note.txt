@@ -1,0 +1,35 @@
+
+|Package Update 
+
+//pharm =  function_bill_update(customerId, tag, amount, requestId, type, entry_by, description);
+
+//customerId = Agent id
+// tag ==   // billpay // paybilldeleted // paybillupdate // discount // previousdue //package ///package---change
+// amount = 10000000
+// requestId = tbl_account as acc_id  for >>>>  paybilldeleted and paybillupdate  
+
+// type =change  >>>>>  when package updated
+
+//description  >>>>>>>  willbe entry for  billpay  or discount
+
+//Packages
+if (isset($_POST['change']) && $_POST['change']) {
+    $obj->rawSql("SELECT function_bill_update(" . $_POST['ag_id'] . ", 'package', " . $_POST['taka'] . ", '', 'change','','') AS function_bill_update");
+} else {
+    $obj->rawSql("SELECT function_bill_update(" . $_POST['ag_id'] . ", 'package', " . $_POST['taka'] . ", '', '','','') AS function_bill_update");
+}
+
+//billpay 
+if(isset($_POST['amount']) && $_POST['amount'] > 0){
+    $obj->rawSql("SELECT function_bill_update(" . $_POST['ag_id'] . ", 'billpay', " . $_POST['amount'] . ", '', '',$userId,'".$_POST['discription']."') AS function_bill_update");
+}
+
+//discount 
+if(isset($_POST['discount']) && $_POST['discount'] > 0){
+    $month=date('M-Y');
+    $obj->rawSql("SELECT function_bill_update(" . $_POST['ag_id'] . ", 'discount', " . $_POST['discount'] . ", '', '',$userId,'Discount given for $month') AS function_bill_update");
+}
+
+
+
+
