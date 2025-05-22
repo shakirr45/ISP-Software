@@ -48,32 +48,37 @@ try {
 ?>
 
 
-<div class="container">
-    <div class="bg-white p-8 rounded shadow-md w-full max-w-2xl">
-        <h2 class="text-2xl font-bold mb-4 text-center">Device Info</h2>
-
-        <?php if ($error): ?>
-            <div class="bg-red-100 text-red-700 p-4 rounded">
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php else: ?>
-            <div class="grid grid-cols-2 gap-4">
-                <div><strong>System Description:</strong></div>
-                <div><?= htmlspecialchars($device['sysDescr'] ?? 'N/A') ?></div>
-
-                <div><strong>System Name:</strong></div>
-                <div><?= htmlspecialchars($device['sysName'] ?? 'N/A') ?></div>
-
-                <div><strong>System Uptime:</strong></div>
-                <div><?= htmlspecialchars($device['sysUpTime'] ?? 'N/A') ?></div>
-
-                <div><strong>CPU Usage:</strong></div>
-                <div><?= htmlspecialchars($device['cpuUsage'] ?? 'N/A') ?></div>
-
-                <div><strong>Memory Usage:</strong></div>
-                <div><?= htmlspecialchars($device['memoryUsage'] ?? 'N/A') ?> %</div>
-            </div>
-        <?php endif; ?>
+<div class="container py-4">
+  <div class="card mx-auto" style="max-width: 480px; border-radius: 0.5rem;">
+    <div class="card-header text-center fw-bold fs-5 bg-light" style="border-radius: 0.5rem 0.5rem 0 0;">
+      Device Information
     </div>
+    <div class="card-body">
+      <?php if ($error): ?>
+        <div class="alert alert-danger" role="alert">
+          <?= htmlspecialchars($error) ?>
+        </div>
+      <?php else: ?>
+        <dl class="row mb-0">
+          <dt class="col-5 text-muted">System Description</dt>
+          <dd class="col-7"><?= htmlspecialchars($device['sysDescr'] ?? 'N/A') ?></dd>
 
+          <dt class="col-5 text-muted">System Name</dt>
+          <dd class="col-7"><?= htmlspecialchars($device['sysName'] ?? 'N/A') ?></dd>
+
+          <dt class="col-5 text-muted">System Uptime</dt>
+          <dd class="col-7"><?= htmlspecialchars($device['sysUpTime'] ?? 'N/A') ?></dd>
+
+          <dt class="col-5 text-muted">CPU Usage</dt>
+          <dd class="col-7"><?= htmlspecialchars($device['cpuUsage'] ?? 'N/A') ?></dd>
+
+          <dt class="col-5 text-muted">Memory Usage</dt>
+          <dd class="col-7"><?= htmlspecialchars($device['memoryUsage'] ?? 'N/A') ?>%</dd>
+        </dl>
+      <?php endif; ?>
+    </div>
+    <div class="card-footer text-center text-muted small" style="border-radius: 0 0 0.5rem 0.5rem;">
+      SNMP data from <code><?= htmlspecialchars($ip) ?></code>
+    </div>
+  </div>
 </div>

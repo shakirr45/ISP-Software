@@ -97,47 +97,62 @@ uasort($onuPorts, function ($a, $b) {
 
 
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <button onclick="location.reload()" class="btn btn-primary btn-sm">
-            🔄 Refresh
-        </button>
-        <h6 class="mb-0 text-secondary">Total ONUs: <?= count($onuPorts) ?></h6>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-primary fw-bold">
+                🖧 ONU Port Overview
+            </h5>
+            <div>
+                <span class="badge bg-info text-dark me-3">Total ONUs: <?= count($onuPorts) ?></span>
+                <button onclick="location.reload()" class="btn btn-sm btn-outline-primary">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-primary">
-                <tr>
-                    <th scope="col">SL</th>
-                    <th scope="col">Interface</th>
-                    <th scope="col">MAC Address	</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Vendor</th>
-                    <th scope="col">UP Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php $sl = 1; foreach ($onuPorts as $onu): ?>
-                    <tr>
-                        <td><?= $sl++ ?></td>
-                        <td><?= htmlspecialchars($onu['name']) ?></td>
-                        <td><?= $onu['serial_number'] ?? '-' ?></td>
-                        <td>
-                            <?php
-                                $status = $onu['status'] ?? 'Unknown';
-                                $badgeClass = match ($status) {
-                                    'Connected' => 'bg-success',
-                                    'Down' => 'bg-danger',
-                                    default => 'bg-secondary',
-                                };
-                            ?>
-                            <span class="badge <?= $badgeClass ?>"><?= $status ?></span>
-                        </td>
-                        <td><?= $onu['vendor_id'] ?? '-' ?></td>
-                        <td><?= $onu['uptime'] ?? '-' ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered align-middle mb-0">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th scope="col">SL</th>
+                            <th scope="col">Interface</th>
+                            <th scope="col">MAC Address</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Vendor</th>
+                            <th scope="col">Uptime</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $sl = 1; foreach ($onuPorts as $onu): ?>
+                            <tr class="text-center">
+                                <td><?= $sl++ ?></td>
+                                <td><code><?= htmlspecialchars($onu['name']) ?></code></td>
+                                <td><span class="text-monospace"><?= $onu['serial_number'] ?? '-' ?></span></td>
+                                <td>
+                                    <?php
+                                        $status = $onu['status'] ?? 'Unknown';
+                                        $badgeClass = match ($status) {
+                                            'Connected' => 'bg-success',
+                                            'Down' => 'bg-danger',
+                                            'Testing' => 'bg-warning text-dark',
+                                            'Dormant', 'Lower Layer Down' => 'bg-secondary',
+                                            default => 'bg-dark',
+                                        };
+                                    ?>
+                                    <span class="badge <?= $badgeClass ?>"><?= $status ?></span>
+                                </td>
+                                <td><?= $onu['vendor_id'] ?? '-' ?></td>
+                                <td><?= $onu['uptime'] ?? '-' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
 </div>

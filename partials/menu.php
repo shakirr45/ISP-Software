@@ -178,7 +178,7 @@
                     <ul class="sidebar-submenu">
                         <?php if ($obj->userMenuePermission('interface_state')) { ?>
                             <li>
-                                <a href="?page=interface_state"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>ONU Interface State</a>
+                                <a href="?page=interface_state"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i>ONU Interface State</a>
                             </li>
                         <?php } ?>
                        
@@ -186,7 +186,7 @@
                     <ul class="sidebar-submenu">
                         <?php if ($obj->userMenuePermission('device_condition')) { ?>
                             <li>
-                                <a href="?page=device_condition"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Device Condition</a>
+                                <a href="?page=device_condition"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i>Device Condition</a>
                             </li>
                         <?php } ?>
                        
@@ -194,7 +194,7 @@
                     <ul class="sidebar-submenu">
                         <?php if ($obj->userMenuePermission('olt_diagram')) { ?>
                             <li>
-                                <a href="?page=olt_diagram"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Diagram</a>
+                                <a href="?page=olt_diagram"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i>Diagram</a>
                             </li>
                         <?php } ?>
                        
