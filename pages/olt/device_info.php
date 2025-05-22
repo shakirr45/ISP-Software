@@ -17,7 +17,7 @@ try {
 
     $sysDescr = $snmp->getValue('1.3.6.1.2.1.1.1.0');
     $sysName = $snmp->getValue('1.3.6.1.2.1.1.5.0');
-    $cpuUsage = $snmp->getValue('1.3.6.1.2.1.4.2.0'); // Optional, may not be supported
+    // $cpuUsage = $snmp->getValue('1.3.6.1.2.1.4.2.0'); // Optional, may not be supported
 
     // System uptime
     $uptimeRaw = shell_exec("snmpwalk -v2c -c $community $ip 1.3.6.1.2.1.1.3.0");
@@ -38,7 +38,7 @@ try {
         'sysDescr' => $sysDescr,
         'sysName' => $sysName,
         'sysUpTime' => $sysUpTime,
-        'cpuUsage' => $cpuUsage,
+        // 'cpuUsage' => $cpuUsage,
         'memoryUsage' => $memoryUsage,
     ];
 
@@ -69,8 +69,8 @@ try {
           <dt class="col-5 text-muted">System Uptime</dt>
           <dd class="col-7"><?= htmlspecialchars($device['sysUpTime'] ?? 'N/A') ?></dd>
 
-          <dt class="col-5 text-muted">CPU Usage</dt>
-          <dd class="col-7"><?= htmlspecialchars($device['cpuUsage'] ?? 'N/A') ?></dd>
+          <!-- <dt class="col-5 text-muted">CPU Usage</dt>
+          <dd class="col-7"><?= htmlspecialchars($device['cpuUsage'] ?? 'N/A') ?></dd> -->
 
           <dt class="col-5 text-muted">Memory Usage</dt>
           <dd class="col-7"><?= htmlspecialchars($device['memoryUsage'] ?? 'N/A') ?>%</dd>
