@@ -109,8 +109,17 @@ uasort($onuPorts, function ($a, $b) {
                         <td><?= isset($onu['distance']) ? $onu['distance'] . ' m' : '-' ?></td>
                         <td><?= isset($onu['tx_power']) ? $onu['tx_power'] . ' dBm' : '-' ?></td>
                         <td><?= isset($onu['rx_power']) ? $onu['rx_power'] . ' dBm' : '-' ?></td>
-                        <td><?= isset($onu['download_bytes']) ? number_format($onu['download_bytes']) : '-' ?></td>
-                        <td><?= isset($onu['upload_bytes']) ? number_format($onu['upload_bytes']) : '-' ?></td>
+                        <td>
+                            <?= isset($onu['download_bytes']) 
+                                ? round($onu['download_bytes'] / 1073741824, 2) . ' GB' 
+                                : '-' ?>
+                        </td>
+                        <td>
+                            <?= isset($onu['upload_bytes']) 
+                                ? round($onu['upload_bytes'] / 1073741824, 2) . ' GB' 
+                                : '-' ?>
+                        </td>
+
                     </tr>
                 <?php endforeach; ?>
             </tbody>
