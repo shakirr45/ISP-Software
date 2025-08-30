@@ -53,7 +53,12 @@ if ($page == 'dashboard') {
     ($obj->userMenuePermission('interface_state')) ? include 'pages/olt/interface_state.php' : include $homepage;
 }elseif ($page == 'olt_diagram') {
     ($obj->userMenuePermission('olt_diagram')) ? include 'pages/olt/olt_diagram.php' : include $homepage;
-}elseif ($page == 'account_head_view') {
+}elseif ($page == 'fetch_onu_data') {
+    ($obj->userMenuePermission('fetch_onu_data')) ? include 'pages/olt/fetch_onu_data.php' : include $homepage;
+}elseif ($page == 'fetch_interface_data') {
+    ($obj->userMenuePermission('fetch_interface_data')) ? include 'pages/olt/fetch_interface_data.php' : include $homepage;
+}
+elseif ($page == 'account_head_view') {
     ($obj->userMenuePermission('account_head_view')) ? include 'pages/expence/account_head_view.php' : include $homepage;
 } elseif ($page == 'account_sub_head_view') {
     ($obj->userMenuePermission('account_sub_head_view')) ? include 'pages/expence/account_sub_head_view.php' : include $homepage;
