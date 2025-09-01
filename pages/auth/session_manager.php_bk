@@ -1,0 +1,101 @@
+<?php
+// File: /var/www/html/olt3/pages/auth/session_manager.php
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../../services/Database.php';
+require_once __DIR__ . '/../../services/CronManager.php';
+
+// Initialize
+$db = new Database();
+$pdo = $db->getConnection();
+$cronManager = new CronManager($pdo);
+
+// Simple functions
+function isLoggedIn() {
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+}
+
+function getCurrentUserId() {
+    return $_SESSION['user_id'] ?? null;
+}
+
+function startUserSession($userId = null) {
+    global $cronManager;
+    $userId = $userId ?: 'user_' . uniqid();
+    $_SESSION['user_id'] = $userId;
+    $_SESSION['login_time'] = time();
+
+    // Start monitoring
+    $result = $cronManager->startMonitoring($userId);
+    if ($result['success']) {
+        $_SESSION['monitoring_expires'] = $result['expires_at'];
+    }
+
+    return $result;
+}
+
+function getSessionStatus() {
+    global $cronManager;
+
+    if (!isLoggedIn()) {
+        return ['logged_in' => false];
+    }
+
+    $userId = getCurrentUserId();
+    $expiresAt = $cronManager->isMonitoringActive($userId);
+
+    return [
+        'logged_in' => true,
+        'user_id' => $userId,
+        'monitoring_active' => $expiresAt !== false,
+        'expires_at' => $expiresAt,
+        'time_remaining' => $expiresAt ? strtotime($expiresAt) - time() : 0
+    ];
+}
+
+// AJAX Handler
+if (isset($_GET['action'])) {
+    header('Content-Type: application/json');
+
+    switch ($_GET['action']) {
+        case 'status':
+            echo json_encode(getSessionStatus());
+            break;
+
+        case 'start':
+            $userId = $_POST['user_id'] ?? null;
+            echo json_encode(startUserSession($userId));
+            break;
+
+        case 'extend':
+            if (isLoggedIn()) {
+                echo json_encode($cronManager->startMonitoring(getCurrentUserId()));
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Not logged in']);
+            }
+            break;
+
+        case 'stop':
+            if (isLoggedIn()) {
+                $cronManager->stopMonitoring(getCurrentUserId());
+                session_destroy();
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false]);
+            }
+            break;
+
+        default:
+            echo json_encode(['error' => 'Invalid action']);
+    }
+    exit;
+}
+
+// Auto-start session if not exists
+if (!isLoggedIn()) {
+    startUserSession();
+}
+?>
