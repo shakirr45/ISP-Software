@@ -1,6 +1,6 @@
 <?php
-set_time_limit(0); // Endless run safe, cron friendly
-date_default_timezone_set('Asia/Dhaka'); // Logging purpose
+set_time_limit(0);
+date_default_timezone_set('Asia/Dhaka');
 
 require_once __DIR__ . '/../../services/Database.php';
 
@@ -17,96 +17,191 @@ function logMessage($msg){
 $oltIp = "172.35.156.14";
 $community = "bsd";
 
-// OIDs
+// OIDs for device condition monitoring
 $oids = [
     'name'     => "1.3.6.1.2.1.2.2.1.2",
     'rx_power' => "1.3.6.1.4.1.3320.101.10.5.1.5",
-    'tx_power' => "1.3.6.1.4.1.3320.101.10.5.1.6",
+    'tx_power' => "1.3.6.1.4.1.3320.101.10.5.1.6", 
     'distance' => "1.3.6.1.4.1.3320.101.10.1.1.27",
     'serial'   => "1.3.6.1.4.1.3320.101.10.1.1.3",
 ];
+
 $oidIfHCInOctets  = "1.3.6.1.2.1.31.1.1.1.10";
 $oidIfHCOutOctets = "1.3.6.1.2.1.31.1.1.1.6";
 
-// SNMP helper
+// SNMP helper with proper error handling
 function snmpWalkLines($community, $oltIp, $oid){
-    $output = shell_exec("snmpwalk -v2c -c $community $oltIp $oid 2>&1");
+    $command = "snmpwalk -v2c -c $community $oltIp $oid 2>&1";
+    logMessage("Executing: $command");
+    
+    $output = shell_exec($command);
+    
+    if(empty($output)){
+        logMessage("ERROR: Empty SNMP response for OID: $oid");
+        return [];
+    }
+    
+    if(strpos($output, 'Timeout') !== false || strpos($output, 'No response') !== false){
+        logMessage("ERROR: SNMP timeout for OID: $oid");
+        return [];
+    }
+    
+    if(strpos($output, 'No Such Object') !== false){
+        logMessage("WARNING: OID not found: $oid");
+        return [];
+    }
+    
+    logMessage("SNMP response length: " . strlen($output) . " chars");
     return explode("\n", trim($output));
 }
 
-logMessage("Fetching data from OLT: $oltIp");
+// Convert hex to readable serial
+function hexToSerial($hexString) {
+    $hex = preg_replace('/[^0-9A-Fa-f ]/', '', $hexString);
+    $hex = trim($hex);
+    return empty($hex) ? null : strtoupper(str_replace(' ', ':', $hex));
+}
 
-// Step 1: Fetch all OLT data
+// Process power values
+function processPowerValue($value) {
+    $intValue = (int)$value;
+    if($intValue == -65535 || $intValue == 65535 || $intValue == 0) return null;
+    return round($intValue / 10, 1);
+}
+
+logMessage("Starting ONU device data fetch from OLT: $oltIp");
+
+// Fetch basic data
 $data = [];
-foreach($oids as $key=>$oid){
-    $lines = snmpWalkLines($community,$oltIp,$oid);
+foreach($oids as $key => $oid){
+    logMessage("Fetching $key...");
+    $lines = snmpWalkLines($community, $oltIp, $oid);
+    
     foreach($lines as $line){
-        if(preg_match('/\.(\d+) = (?:STRING|INTEGER|Hex-STRING|Gauge32): ?"?(.+?)"?$/',$line,$matches)){
+        if(empty(trim($line))) continue;
+        
+        // Universal regex for both ISO and standard format
+        if(preg_match('/(?:iso\.)?[\d\.]*\.(\d+)\s*=\s*([^:]+):\s*(.+)$/', $line, $matches)){
             $index = $matches[1];
-            $value = $matches[2];
-            if(in_array($key,['rx_power','tx_power'])){
-                $value=(int)$value;
-                if($value==-65535) continue;
-                $value=$value/10;
+            $type = trim($matches[2]);
+            $value = trim($matches[3], '"');
+            
+            switch($key){
+                case 'rx_power':
+                case 'tx_power':
+                    $processed = processPowerValue($value);
+                    if($processed !== null) $data[$index][$key] = $processed;
+                    break;
+                    
+                case 'serial':
+                    if($type === 'Hex-STRING'){
+                        $data[$index][$key] = hexToSerial($value);
+                    } else {
+                        $data[$index][$key] = $value ?: null;
+                    }
+                    break;
+                    
+                case 'distance':
+                    $intVal = (int)$value;
+                    $data[$index][$key] = $intVal > 0 ? $intVal : null;
+                    break;
+                    
+                default:
+                    $data[$index][$key] = $value ?: null;
             }
-            if($key==='serial'){
-                $hex=preg_replace('/[^0-9A-Fa-f ]/','',$value);
-                $value=strtoupper(str_replace(' ',':',trim($hex)));
-            }
-            $data[$index][$key]=$value;
         }
     }
 }
 
-// Step 2: Download bytes
-foreach(snmpWalkLines($community,$oltIp,$oidIfHCInOctets) as $line){
-    if(preg_match('/\.(\d+) = Counter64: (\d+)/',$line,$matches)){
-        $index=$matches[1];
-        $data[$index]['download_bytes']=(int)$matches[2];
+// Fetch traffic data
+logMessage("Fetching traffic data...");
+foreach(snmpWalkLines($community, $oltIp, $oidIfHCInOctets) as $line){
+    if(preg_match('/\.(\d+) = Counter64: (\d+)/', $line, $matches)){
+        $index = $matches[1];
+        $bytes = (int)$matches[2];
+        if($bytes > 0) $data[$index]['download_bytes'] = $bytes;
     }
 }
 
-// Step 3: Upload bytes
-foreach(snmpWalkLines($community,$oltIp,$oidIfHCOutOctets) as $line){
-    if(preg_match('/\.(\d+) = Counter64: (\d+)/',$line,$matches)){
-        $index=$matches[1];
-        $data[$index]['upload_bytes']=(int)$matches[2];
+foreach(snmpWalkLines($community, $oltIp, $oidIfHCOutOctets) as $line){
+    if(preg_match('/\.(\d+) = Counter64: (\d+)/', $line, $matches)){
+        $index = $matches[1];
+        $bytes = (int)$matches[2];
+        if($bytes > 0) $data[$index]['upload_bytes'] = $bytes;
     }
 }
 
-// Step 4: Filter EPON only
-$onuPorts = array_filter($data,function($item){
-    return isset($item['name']) && preg_match('/^EPON\d+\/\d+:\d+$/',$item['name']);
+// Filter EPON ports
+$onuPorts = array_filter($data, function($item){
+    return isset($item['name']) && preg_match('/^EPON\d+\/\d+:\d+$/', $item['name']);
 });
 
-// Step 5: Sort logically
-uasort($onuPorts,function($a,$b){
-    preg_match('/EPON(\d+)\/(\d+):(\d+)/',$a['name'],$m1);
-    preg_match('/EPON(\d+)\/(\d+):(\d+)/',$b['name'],$m2);
-    return [$m1[1],$m1[2],$m1[3]]<=>[$m2[1],$m2[2],$m2[3]];
+// Sort logically
+uasort($onuPorts, function($a, $b){
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $a['name'], $m1);
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $b['name'], $m2);
+    return [(int)$m1[1], (int)$m1[2], (int)$m1[3]] <=> [(int)$m2[1], (int)$m2[2], (int)$m2[3]];
 });
 
-// Step 6: Insert/Update DB
-$inserted = 0;
-foreach($onuPorts as $onu){
-    $stmt = $pdo->prepare("
-        INSERT INTO onu_status (olt_ip,interface_name,serial,distance,tx_power,rx_power,download_bytes,upload_bytes)
-        VALUES (:olt_ip,:interface_name,:serial,:distance,:tx_power,:rx_power,:download_bytes,:upload_bytes)
-        ON DUPLICATE KEY UPDATE
-            serial=:serial, distance=:distance, tx_power=:tx_power, rx_power=:rx_power,
-            download_bytes=:download_bytes, upload_bytes=:upload_bytes, last_updated=CURRENT_TIMESTAMP()
-    ");
-    $stmt->execute([
-        ':olt_ip'=>$oltIp,
-        ':interface_name'=>$onu['name'],
-        ':serial'=>$onu['serial'] ?? null,
-        ':distance'=>$onu['distance'] ?? null,
-        ':tx_power'=>$onu['tx_power'] ?? null,
-        ':rx_power'=>$onu['rx_power'] ?? null,
-        ':download_bytes'=>$onu['download_bytes'] ?? null,
-        ':upload_bytes'=>$onu['upload_bytes'] ?? null
-    ]);
-    $inserted++;
+logMessage("Found " . count($onuPorts) . " EPON ports");
+
+// Database operations
+$inserted = $updated = $errors = 0;
+
+try {
+    $pdo->beginTransaction();
+    
+    foreach($onuPorts as $onu){
+        try {
+            $checkStmt = $pdo->prepare("SELECT id FROM onu_status WHERE olt_ip = ? AND interface_name = ?");
+            $checkStmt->execute([$oltIp, $onu['name']]);
+            
+            if($checkStmt->fetch()){
+                $stmt = $pdo->prepare("
+                    UPDATE onu_status SET
+                        serial = ?, distance = ?, tx_power = ?, rx_power = ?,
+                        download_bytes = ?, upload_bytes = ?, last_updated = CURRENT_TIMESTAMP
+                    WHERE olt_ip = ? AND interface_name = ?
+                ");
+                $stmt->execute([
+                    $onu['serial'] ?? null,
+                    $onu['distance'] ?? null,
+                    $onu['tx_power'] ?? null,
+                    $onu['rx_power'] ?? null,
+                    $onu['download_bytes'] ?? null,
+                    $onu['upload_bytes'] ?? null,
+                    $oltIp,
+                    $onu['name']
+                ]);
+                $updated++;
+            } else {
+                $stmt = $pdo->prepare("
+                    INSERT INTO onu_status (olt_ip, interface_name, serial, distance, tx_power, rx_power, download_bytes, upload_bytes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([
+                    $oltIp,
+                    $onu['name'],
+                    $onu['serial'] ?? null,
+                    $onu['distance'] ?? null,
+                    $onu['tx_power'] ?? null,
+                    $onu['rx_power'] ?? null,
+                    $onu['download_bytes'] ?? null,
+                    $onu['upload_bytes'] ?? null
+                ]);
+                $inserted++;
+            }
+        } catch(Exception $e) {
+            logMessage("Error: " . $e->getMessage());
+            $errors++;
+        }
+    }
+    
+    $pdo->commit();
+    logMessage("SUCCESS: Inserted: $inserted, Updated: $updated, Errors: $errors");
+    
+} catch(Exception $e) {
+    $pdo->rollBack();
+    logMessage("CRITICAL ERROR: " . $e->getMessage());
 }
-
-logMessage("ONU data fetched and updated successfully for {$inserted} ports.");
+?>
