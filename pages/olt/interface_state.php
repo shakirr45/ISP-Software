@@ -1,100 +1,77 @@
 <?php
-
 set_time_limit(300);
 
-$oltIp = "172.30.30.6";
-$community = "nmscloud";
+$oltIp = "103.178.220.124:50501";
+$community = "bsd";
 
-// SNMP OIDs
+// OIDs
 $oidIfDescr      = "1.3.6.1.2.1.2.2.1.2";
 $oidIfOperStatus = "1.3.6.1.2.1.2.2.1.8";
-$oidVendorId     = "1.3.6.1.4.1.3320.101.10.1.1.1";
-$oidSerial       = "1.3.6.1.4.1.3320.101.10.1.1.3";
-$oidOnuUpTime    = "1.3.6.1.2.1.2.2.1.9"; 
+$oidOnuUpTime    = "1.3.6.1.2.1.2.2.1.9";
+$oidMacAddr      = "1.3.6.1.4.1.37950.1.1.5.12.1.12.1.6";
+// snmpbulkwalk -v2c -c bsd -Cr10 -t 4 -r 1 -Cc 103.178.220.124:50501
 
-// SNMP Fetching
 function snmpFetch($oid) {
     global $oltIp, $community;
-    $output = shell_exec("snmpwalk -v2c -c $community $oltIp $oid");
-
-    if ($output === null || trim($output) === "") {
-        return []; 
-    }
-
-    return explode("\n", trim($output));
+    $out = shell_exec("snmpwalk -v2c -c $community $oltIp $oid");
+    return $out ? explode("\n", trim($out)) : [];
 }
 
-$descrLines     = snmpFetch($oidIfDescr);
-$statusLines    = snmpFetch($oidIfOperStatus);
-$vendorIdLines  = snmpFetch($oidVendorId);
-$serialLines    = snmpFetch($oidSerial);
-$upTimeLines    = snmpFetch($oidOnuUpTime);
+// Fetch data
+$descrLines    = snmpFetch($oidIfDescr);
+$statusLines   = snmpFetch($oidIfOperStatus);
+$uptimeLines   = snmpFetch($oidOnuUpTime);
+$macLines      = snmpFetch($oidMacAddr);
 
 $interfaceData = [];
 
-function hexToSerial($hexString) {
-    $parts = explode(' ', $hexString);
-    return strtoupper(implode(':', $parts));
-}
-
-// Interface Name
+// --- Interface Name ---
 foreach ($descrLines as $line) {
-    if (preg_match('/\.(\d+) = STRING: (.+)/', $line, $matches)) {
-        $interfaceData[$matches[1]] = ['name' => $matches[2]];
+    if (preg_match('/\.(\d+) = STRING: (.+)/', $line, $m)) {
+        $interfaceData[$m[1]] = ['name' => trim($m[2])];
     }
 }
 
-// Status
+// --- Status ---
 $statusMap = [1 => 'Connected', 2 => 'Down', 3 => 'Testing', 4 => 'Unknown', 5 => 'Dormant', 6 => 'Not Present', 7 => 'Lower Layer Down'];
 foreach ($statusLines as $line) {
-    if (preg_match('/\.(\d+) = INTEGER: \w+\((\d+)\)/', $line, $matches)) {
-        $interfaceData[$matches[1]]['status'] = $statusMap[$matches[2]] ?? 'Unknown';
+    if (preg_match('/\.(\d+) = INTEGER: \w+\((\d+)\)/', $line, $m)) {
+        $interfaceData[$m[1]]['status'] = $statusMap[$m[2]] ?? 'Unknown';
     }
 }
 
-// Vendor ID
-foreach ($vendorIdLines as $line) {
-    if (preg_match('/\.(\d+) = STRING: "?(.+?)"?$/', $line, $matches)) {
-        $interfaceData[$matches[1]]['vendor_id'] = $matches[2];
+// --- Uptime ---
+foreach ($uptimeLines as $line) {
+    if (preg_match('/\.(\d+) = Timeticks: \((\d+)\)/', $line, $m)) {
+        $sec = (int)$m[2] / 100;
+        $interfaceData[$m[1]]['uptime'] = sprintf("%dd %dh %dm", $sec/86400, ($sec%86400)/3600, ($sec%3600)/60);
     }
 }
 
-// Serial Number
-foreach ($serialLines as $line) {
-    if (preg_match('/\.(\d+) = (Hex-STRING|STRING):\s(.+)/', $line, $matches)) {
-        $index = $matches[1];
-        $value = trim($matches[3]);
+// --- Filter only ONUs ---
+$onuPorts = array_filter($interfaceData, fn($d) => isset($d['name']) && preg_match('/^EPON\d+\/\d+:\d+$/', $d['name']));
 
-        $interfaceData[$index]['serial_number'] = $matches[2] === "Hex-STRING" ? hexToSerial($value) : trim($value, '"');
-    }
-}
-
-// ONU Uptime (Timeticks to readable format)
-foreach ($upTimeLines as $line) {
-    if (preg_match('/\.(\d+) = Timeticks: \((\d+)\) (.+)/', $line, $matches)) {
-        $index = $matches[1];
-        $ticks = (int)$matches[2];
-        $seconds = (int)($ticks / 100); // Cast to int before modulo operations
-        $days = floor($seconds / 86400);
-        $hours = floor(($seconds % 86400) / 3600);
-        $minutes = floor(($seconds % 3600) / 60);
-        $formatted = "{$days}d {$hours}h {$minutes}m";
-        $interfaceData[$index]['uptime'] = $formatted;
-    }
-}
-
-// Filter ONU Ports
-$onuPorts = array_filter($interfaceData, function ($data) {
-    return isset($data['name']) && preg_match('/^EPON\d+\/\d+:\d+$/', $data['name']);
+// --- Sort ONUs by EPON port ---
+uasort($onuPorts, function($a, $b) {
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $a['name'], $x);
+    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $b['name'], $y);
+    return [$x[1],$x[2],$x[3]] <=> [$y[1],$y[2],$y[3]];
 });
 
-// Sort logically
-uasort($onuPorts, function ($a, $b) {
-    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $a['name'], $aMatch);
-    preg_match('/EPON(\d+)\/(\d+):(\d+)/', $b['name'], $bMatch);
-    return [$aMatch[1], $aMatch[2], $aMatch[3]] <=> [$bMatch[1], $bMatch[2], $bMatch[3]];
-});
+$onuPortsKeys = array_keys($onuPorts);
 
+// --- MAC Addresses order-wise mapping ---
+$macList = [];
+foreach ($macLines as $line) {
+    if (preg_match('/= STRING: "?(.+?)"?$/', $line, $m)) {
+        $macList[] = $m[1];
+    }
+}
+
+// Assign MACs in sorted order
+foreach ($onuPortsKeys as $i => $key) {
+    $onuPorts[$key]['mac_addr'] = $macList[$i] ?? '-';
+}
 ?>
 
 <div class="container py-4">
@@ -121,23 +98,21 @@ uasort($onuPorts, function ($a, $b) {
                         <tr>
                             <th scope="col">SL</th>
                             <th scope="col">Interface</th>
-                            <th scope="col">MAC Address</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Vendor</th>
+                            <th scope="col">MAC Address</th>
                             <th scope="col">Uptime</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($onuPorts)): ?>
                             <tr>
-                                <td colspan="6" class="text-center text-danger">⚠ No ONU data found</td>
+                                <td colspan="5" class="text-center text-danger">⚠ No ONU data found</td>
                             </tr>
                         <?php else: ?>
                             <?php $sl = 1; foreach ($onuPorts as $onu): ?>
                                 <tr class="text-center">
                                     <td><?= $sl++ ?></td>
                                     <td><code><?= htmlspecialchars($onu['name']) ?></code></td>
-                                    <td><span class="text-monospace"><?= $onu['serial_number'] ?? '-' ?></span></td>
                                     <td>
                                         <?php
                                             $status = $onu['status'] ?? 'Unknown';
@@ -151,7 +126,7 @@ uasort($onuPorts, function ($a, $b) {
                                         ?>
                                         <span class="badge <?= $badgeClass ?>"><?= $status ?></span>
                                     </td>
-                                    <td><?= $onu['vendor_id'] ?? '-' ?></td>
+                                    <td><code><?= $onu['mac_addr'] ?? '-' ?></code></td>
                                     <td><?= $onu['uptime'] ?? '-' ?></td>
                                 </tr>
                             <?php endforeach; ?>

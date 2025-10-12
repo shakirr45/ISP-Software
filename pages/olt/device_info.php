@@ -2,7 +2,7 @@
 require 'vendor/autoload.php'; // FreeDSx SNMP
 
 // $ip = '172.35.156.14';
-$ip = '103.89.26.227:1200';
+$ip = '103.178.220.124:50501';
 $community = 'bsd';
 
 $error = null;

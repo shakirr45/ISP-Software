@@ -2,12 +2,13 @@
 set_time_limit(0);
 
 // === OLT credentials & OIDs ===
-$oltIp = "172.30.30.6";
-$community = "nmscloud";
+$oltIp = "103.178.220.124:50501";
+$community = "bsd";
 $oids = [
-    'descr' => "1.3.6.1.2.1.2.2.1.2",
+    'descr'       => "1.3.6.1.2.1.2.2.1.2",
     'oper_status' => "1.3.6.1.2.1.2.2.1.8"
 ];
+// snmpbulkwalk -v2c -c bsd -Cr10 -t 4 -r 1 -Cc 103.178.220.124:50501
 
 // SNMP fetch function
 function snmpBulkFetch($community, $oltIp, $oids){
@@ -15,9 +16,13 @@ function snmpBulkFetch($community, $oltIp, $oids){
     foreach($oids as $key=>$oid){
         $lines = explode("\n", trim(shell_exec("snmpbulkwalk -v2c -c $community -t 2 -r 2 $oltIp $oid 2>&1")));
         foreach($lines as $line){
-            if(preg_match('/\.(\d+)\s*=\s*(?:STRING|INTEGER):\s*"?(.+?)"?$/', $line, $m)){
+            // match integer or string values
+            if(preg_match('/\.(\d+)\s*=\s*(?:STRING|INTEGER):\s*(.*)$/i', trim($line), $m)){
                 $index = $m[1];
-                $value = $m[2];
+                $value = trim($m[2], "\" ");
+                // clean INTEGER prefix
+                $value = preg_replace('/^INTEGER:\s*/i', '', $value);
+                $value = preg_replace('/^STRING:\s*/i', '', $value);
                 $data[$index][$key] = $value;
             }
         }
@@ -29,9 +34,19 @@ function snmpBulkFetch($community, $oltIp, $oids){
 $onuData = snmpBulkFetch($community, $oltIp, $oids);
 
 // Map SNMP oper_status to readable
-$statusMap = [1=>'Connected', 2=>'Down', 3=>'Testing',4=>'Unknown',5=>'Dormant',6=>'Not Present',7=>'Lower Layer Down'];
-foreach($onuData as $idx=>$onu){
-    $onuData[$idx]['status'] = $statusMap[$onu['oper_status'] ?? 0] ?? 'Unknown';
+$statusMap = [
+    1 => 'Connected',
+    2 => 'Down',
+    3 => 'Testing',
+    4 => 'Unknown',
+    5 => 'Dormant',
+    6 => 'Not Present',
+    7 => 'Lower Layer Down'
+];
+
+foreach($onuData as $idx => $onu){
+    $rawStatus = (int)preg_replace('/\D/', '', $onu['oper_status'] ?? '0'); // extract numeric only
+    $onuData[$idx]['status'] = $statusMap[$rawStatus] ?? 'Unknown';
 }
 
 // Build EPON tree dynamically
@@ -58,14 +73,17 @@ foreach($eponTree as $port=>$data){
     foreach($data['onus'] ?? [] as $onu){
         $links[] = [$port, $onu['name']];
         $color = match(strtolower($onu['status'])){
-            'connected'=>'green',
-            'down'=>'red',
-            default=>'orange'
+            'connected' => 'green',
+            'down' => 'red',
+            default => 'orange'
         };
         $nodesColor[$onu['name']] = $color;
     }
 }
 $nodesColor['OLT'] = '#000000';
+
+// Optional debug (you can comment out later)
+// echo "<pre>"; print_r($onuData); echo "</pre>";
 ?>
 
 <div id="container" style="height: 600px;"></div>
@@ -97,4 +115,3 @@ Highcharts.chart('container', {
     }]
 });
 </script>
-
